@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iCash - מערכת קופות רושמות</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .products-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-checkbox {
+            width: auto;
+            margin-left: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .loyal-customers, .top-products {
+            margin-top: 20px;
+        }
+
+        .list-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-right: 4px solid #667eea;
+        }
+
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .error-message {
+            background: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .total-amount {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f5ff;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 iCash - מערכת קופות רושמות</h1>
+        
+        <div id="message"></div>
+        
+        <div class="grid">
+            <!-- Cash Register Card -->
+            <div class="card">
+                <h2>📝 קופה רושמת</h2>
+                <form id="purchaseForm">
+                    <div class="form-group">
+                        <label for="supermarket">בחר סניף:</label>
+                        <select id="supermarket" required>
+                            <option value="">-- בחר סניף --</option>
+                            <option value="1">סניף 1 - תל אביב</option>
+                            <option value="2">סניף 2 - ירושלים</option>
+                            <option value="3">סניף 3 - חיפה</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customerType">סוג לקוח:</label>
+                        <select id="customerType" required>
+                            <option value="new">לקוח חדש</option>
+                            <option value="existing">לקוח קיים</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="existingCustomerGroup" style="display: none;">
+                        <label for="existingCustomer">בחר לקוח:</label>
+                        <select id="existingCustomer">
+                            <option value="">-- בחר לקוח --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>בחר מוצרים:</label>
+                        <div class="products-list" id="productsList">
+                            <div class="loading"></div> טוען מוצרים...
+                        </div>
+                    </div>
+                    
+                    <div class="total-amount" id="totalAmount">
+                        סה"כ לתשלום: ₪0.00
+                    </div>
+                    
+                    <button type="submit" id="submitButton">
+                        בצע רכישה
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Analytics Card -->
+            <div class="card">
+                <h2>📊 ניתוח נתונים</h2>
+                <button onclick="loadAnalytics()" id="analyticsButton">
+                    טען נתונים עדכניים
+                </button>
+                
+                <div id="analyticsContent" style="margin-top: 20px;">
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-value" id="uniqueCustomers">-</div>
+                            <div class="stat-label">לקוחות ייחודיים</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="loyalCustomers">-</div>
+                            <div class="stat-label">לקוחות נאמנים</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalPurchases">-</div>
+                            <div class="stat-label">סה"כ רכישות</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalRevenue">-</div>
+                            <div class="stat-label">הכנסות כוללות</div>
+                        </div>
+                    </div>
+                    
+                    <div class="loyal-customers">
+                        <h3>🌟 לקוחות נאמנים מובילים</h3>
+                        <div id="loyalCustomersList"></div>
+                    </div>
+                    
+                    <div class="top-products">
+                        <h3>🏆 מוצרים נמכרים ביותר</h3>
+                        <div id="topProductsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        let products = [];
+        let selectedProducts = new Set();
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProducts();
+            loadExistingCustomers();
+            loadAnalytics();
+        });
+
+        // Customer type change handler
+        document.getElementById('customerType').addEventListener('change', (e) => {
+            const existingGroup = document.getElementById('existingCustomerGroup');
+            if (e.target.value === 'existing') {
+                existingGroup.style.display = 'block';
+            } else {
+                existingGroup.style.display = 'none';
+            }
+        });
+
+        // Load products
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/cash-register/products`);
+                products = await response.json();
+                displayProducts();
+            } catch (error) {
+                showMessage('שגיאה בטעינת מוצרים', 'error');
+            }
+        }
+
+        // Display products
+        function displayProducts() {
+            const container = document.getElementById('productsList');
+            container.innerHTML = products.map(product => `
+                <div class="product-item">
+                    <span>${product.name} - ₪${product.price.toFixed(2)}</span>
+                    <input type="checkbox" 
+                           class="product-checkbox" 
+                           value="${product.id}" 
+                           onchange="toggleProduct(${product.id}, ${product.price})">
+                </div>
+            `).join('');
+        }
+
+        // Toggle product selection
+        function toggleProduct(productId, price) {
+            if (selectedProducts.has(productId)) {
+                selectedProducts.delete(productId);
+            } else {
+                selectedProducts.add(productId);
+            }
+            updateTotal();
+        }
+
+        // Update total amount
+        function updateTotal() {
+            let total = 0;
+            selectedProducts.forEach(productId => {
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    total += product.price;
+                }
+            });
+            document.getElementById('totalAmount').textContent = `סה"כ לתשלום: ₪${total.toFixed(2)}`;
+        }
+
+        // Load existing customers
+        async function loadExistingCustomers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/cash-register/customers`);
+                const customers = await response.json();
+                const select = document.getElementById('existingCustomer');
+                select.innerHTML = '<option value="">-- בחר לקוח --</option>' + 
+                    customers.map(c => `
+                        <option value="${c.user_id}">
+                            לקוח ${c.user_id.substring(0, 8)}... (${c.purchase_count} רכישות)
+                        </option>
+                    `).join('');
+            } catch (error) {
+                console.error('Error loading customers:', error);
+            }
+        }
+
+        // Handle purchase form submission
+        document.getElementById('purchaseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const supermarketId = parseInt(document.getElementById('supermarket').value);
+            const customerType = document.getElementById('customerType').value;
+            const existingCustomerId = document.getElementById('existingCustomer').value;
+            
+            if (selectedProducts.size === 0) {
+                showMessage('אנא בחר לפחות מוצר אחד', 'error');
+                return;
+            }
+            
+            const userId = customerType === 'new' ? 'new' : existingCustomerId;
+            if (customerType === 'existing' && !userId) {
+                showMessage('אנא בחר לקוח קיים', 'error');
+                return;
+            }
+            
+            const purchaseData = {
+                supermarket_id: supermarketId,
+                user_id: userId,
+                items: Array.from(selectedProducts).map(id => ({ product_id: id }))
+            };
+            
+            const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="loading"></span> מבצע רכישה...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/cash-register/purchase`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(purchaseData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(`✅ הרכישה בוצעה בהצלחה! מספר רכישה: ${result.purchase_id}`, 'success');
+                    resetForm();
+                    loadAnalytics();
+                    if (customerType === 'new') {
+                        loadExistingCustomers();
+                    }
+                } else {
+                    showMessage(`שגיאה: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showMessage('שגיאה בביצוע הרכישה', 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'בצע רכישה';
+            }
+        });
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('purchaseForm').reset();
+            selectedProducts.clear();
+            document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
+            updateTotal();
+            document.getElementById('existingCustomerGroup').style.display = 'none';
+        }
+
+        // Load analytics
+        async function loadAnalytics() {
+            const button = document.getElementById('analyticsButton');
+            button.disabled = true;
+            button.innerHTML = '<span class="loading"></span> טוען נתונים...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/dashboard`);
+                const data = await response.json();
+                
+                // Update statistics
+                document.getElementById('uniqueCustomers').textContent = data.unique_customers || 0;
+                document.getElementById('loyalCustomers').textContent = data.loyal_customers_count || 0;
+                document.getElementById('totalPurchases').textContent = data.statistics?.total_purchases || 0;
+                document.getElementById('totalRevenue').textContent = 
+                    `₪${(data.statistics?.total_revenue || 0).toFixed(2)}`;
+                
+                // Display loyal customers
+                const loyalContainer = document.getElementById('loyalCustomersList');
+                if (data.loyal_customers && data.loyal_customers.length > 0) {
+                    loyalContainer.innerHTML = data.loyal_customers.slice(0, 5).map(customer => `
+                        <div class="list-item">
+                            <strong>לקוח:</strong> ${customer.user_id.substring(0, 8)}...<br>
+                            <strong>רכישות:</strong> ${customer.purchase_count}<br>
+                            <strong>סה"כ הוצאות:</strong> ₪${customer.total_spent.toFixed(2)}
+                        </div>
+                    `).join('');
+                } else {
+                    loyalContainer.innerHTML = '<div class="list-item">אין עדיין לקוחות נאמנים</div>';
+                }
+                
+                // Display top products
+                const topContainer = document.getElementById('topProductsList');
+                if (data.top_products && data.top_products.length > 0) {
+                    topContainer.innerHTML = data.top_products.map(product => `
+                        <div class="list-item">
+                            <strong>#${product.rank}</strong> ${product.product_name}<br>
+                            <strong>נמכרו:</strong> ${product.units_sold} יחידות
+                        </div>
+                    `).join('');
+                } else {
+                    topContainer.innerHTML = '<div class="list-item">אין עדיין נתונים</div>';
+                }
+                
+            } catch (error) {
+                showMessage('שגיאה בטעינת נתוני ניתוח', 'error');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'טען נתונים עדכניים';
+            }
+        }
+
+        // Show message
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
