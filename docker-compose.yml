@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: icash_postgres
+    environment:
+      POSTGRES_DB: icash_db
+      POSTGRES_USER: icash_user
+      POSTGRES_PASSWORD: icash_password
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/data:/docker-entrypoint-initdb.d/data
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - icash_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U icash_user -d icash_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Cash Register Service
+  cash-register:
+    build: ./cash-register-service
+    container_name: icash_cash_register
+    environment:
+      DATABASE_URL: postgresql://icash_user:icash_password@postgres:5432/icash_db
+      SERVICE_PORT: 8001
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - icash_network
+    restart: unless-stopped
+
+  # Analytics Service
+  analytics:
+    build: ./analytics-service
+    container_name: icash_analytics
+    environment:
+      DATABASE_URL: postgresql://icash_user:icash_password@postgres:5432/icash_db
+      SERVICE_PORT: 8002
+    ports:
+      - "8002:8002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - icash_network
+    restart: unless-stopped
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    container_name: icash_api_gateway
+    environment:
+      CASH_REGISTER_URL: http://cash-register:8001
+      ANALYTICS_URL: http://analytics:8002
+      SERVICE_PORT: 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - cash-register
+      - analytics
+    networks:
+      - icash_network
+    restart: unless-stopped
+
+networks:
+  icash_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
