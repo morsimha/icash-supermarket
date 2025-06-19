@@ -1,5 +1,3 @@
-markdown# iCash Supermarket System
-
 A microservices-based cash register system for supermarkets, built with Python, Flask, PostgreSQL, and Docker.
 
 ## Features
