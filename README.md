@@ -1,5 +1,8 @@
 # iCash Supermarket System
-![image](https://github.com/user-attachments/assets/03ba03bb-c5f5-4630-905d-45081d9bfb86)
+![image](https://github.com/user-attachments/assets/14c8c480-1072-435a-acc7-0ec923012cf2)
+
+
+
 
 A microservices-based cash register system for supermarkets, built with Python, Flask, PostgreSQL, and Docker.
 Rent Review Reveal is a web application designed to help renters make informed decisions about apartments. It provides apartment reviews, ratings, and advice using a combination of user input and AI-powered analysis. The app aims to demystify the rental process, offering insights into apartment quality, neighborhood, and value, so users can rent with confidence.
