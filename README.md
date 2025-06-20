@@ -1,6 +1,7 @@
 # iCash Supermarket System
 
 A microservices-based cash register system for supermarkets, built with Python, Flask, PostgreSQL, and Docker.
+Rent Review Reveal is a web application designed to help renters make informed decisions about apartments. It provides apartment reviews, ratings, and advice using a combination of user input and AI-powered analysis. The app aims to demystify the rental process, offering insights into apartment quality, neighborhood, and value, so users can rent with confidence.
 
 ## Features
 
@@ -59,6 +60,9 @@ docker-compose up -d
 4. Check service health:
 ```bash
 curl http://localhost:8000/health
+
+5. Open `ui/index.html` in your browser
+
 ```
 
 ## Business Requirements (Version 1.0)
@@ -74,6 +78,18 @@ curl http://localhost:8000/health
 - Shows count of unique customers across the network
 - Lists loyal customers (customers with 3+ purchases)
 - Displays top 3 best-selling products (handles ties)
+
+## Usage
+
+After starting the development server:
+- Open your browser and go to the local address (e.g., http://localhost:8080).
+- Open `ui/index.html` in your browser
+- Explore the main features:
+  - Browse and search for apartments
+  - View detailed apartment cards with ratings, images, and advice
+  - Use interactive tools like the Apartment Designer and games
+  - (If authentication is enabled) Sign up or log in to save favorites and leave reviews
+- No default login is required unless you enable authentication features.
 
 ## API Endpoints
 
