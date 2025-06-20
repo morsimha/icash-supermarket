@@ -1,5 +1,6 @@
 # iCash Supermarket System
-![image](https://github.com/user-attachments/assets/14c8c480-1072-435a-acc7-0ec923012cf2)
+<img src="https://github.com/user-attachments/assets/14c8c480-1072-435a-acc7-0ec923012cf2" width="600"/>
+
 
 
 
